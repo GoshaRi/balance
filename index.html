@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Баланс</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+  <div class="container">
+    <header class="balance-header">
+      <div class="month" id="currentMonth">Январь 2026</div>
+      <div class="balance" id="balance">0 ₽</div>
+      <div class="stats">
+        <div class="stat income">
+          <span>Приход</span>
+          <span id="income">+0 ₽</span>
+        </div>
+        <div class="stat expense">
+          <span>Расход</span>
+          <span id="expense">−0 ₽</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="input-block">
+      <input type="text" id="input" placeholder="143 молоко" autocomplete="off">
+      <div class="buttons">
+        <button id="btnIncome" class="btn income">Доход</button>
+        <button id="btnExpense" class="btn expense">Расход</button>
+      </div>
+    </div>
+
+    <div class="history" id="history">
+      <div class="history-header">
+        <button id="prevMonth">&lt;</button>
+        <span>История</span>
+        <button id="nextMonth">&gt;</button>
+      </div>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

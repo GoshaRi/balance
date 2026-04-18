@@ -2,7 +2,7 @@
     "name": "Финансы",
     "short_name": "Финансы",
     "description": "Приложение для учета финансов",
-    "start_url": "/index.html",
+    "start_url": "./",
     "display": "standalone",
     "background_color": "#faf6f0",
     "theme_color": "#faf6f0",

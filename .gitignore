@@ -1,3 +1,23 @@
+# === 🔐 СЕКРЕТЫ ===
+# Не загружать конфиг с реальными ключами
+js/config.js
+
+# === 🗑️ СИСТЕМНЫЕ ===
+.DS_Store
+Thumbs.db
+*.log
+
+# === 📦 СБОРКА ===
+node_modules/
+dist/
+build/
+
+# === 💻 IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+
+
 AO.md
-PLAN.md
-TODO.md

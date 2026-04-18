@@ -1,143 +1,275 @@
-const CONFIG = {
-  CLIENT_ID: '',
-  API_KEY: '',
-  SPREADSHEET_ID: ''
+/**
+ * 🚀 APP LAYER - Основная логика и обработчики
+ * 
+ * Связывает UI и Data слои
+ */
+
+// Глобальное состояние
+const state = {
+    currentDate: new Date(),        // Месяц для отображения
+    selectedDate: new Date(),       // Дата для новой записи
+    transactions: [],               // Загруженные данные
+    editMode: false,                // Режим редактирования
+    editingId: null,                // ID редактируемой записи
 };
 
-let currentMonth = new Date();
-let entries = [];
-let isAuthenticated = false;
-
-const monthNames = [
-  'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-  'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-];
-
-function formatMonth(date) {
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-function formatDate(date) {
-  const d = new Date(date);
-  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function formatAmount(amount, type) {
-  return type === 'income' ? `+${amount} ₽` : `−${amount} ₽`;
-}
-
-function parseInput(str) {
-  const match = str.match(/^(\d+)\s+(.+)$/);
-  if (!match) return null;
-  return {
-    amount: parseInt(match[1], 10),
-    description: match[2].trim()
-  };
-}
-
-function filterByMonth(entries, date) {
-  return entries.filter(e => {
-    const d = new Date(e.date);
-    return d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear();
-  });
-}
-
-function calcStats(entries) {
-  const income = entries.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
-  const expense = entries.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
-  return { income, expense, balance: income - expense };
-}
-
-function render() {
-  document.getElementById('currentMonth').textContent = formatMonth(currentMonth);
-
-  const monthEntries = filterByMonth(entries, currentMonth);
-  const stats = calcStats(monthEntries);
-
-  document.getElementById('balance').textContent = `${stats.balance} ₽`;
-  const balanceEl = document.getElementById('balance');
-  balanceEl.className = 'balance ' + (stats.balance >= 0 ? 'positive' : 'negative');
-
-  document.getElementById('income').textContent = `+${stats.income} ₽`;
-  document.getElementById('expense').textContent = `−${stats.expense} ₽`;
-
-  const list = document.getElementById('historyList');
-  list.innerHTML = monthEntries.slice(0, 20).map(e => `
-    <li>
-      <span class="date">${formatDate(e.date)}</span>
-      <span class="description">${e.description}</span>
-      <span class="amount ${e.type}">${formatAmount(e.amount, e.type)}</span>
-    </li>
-  `).join('');
-}
-
-document.getElementById('input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const type = e.target.dataset.type || 'expense';
-    const parsed = parseInput(e.target.value);
-    if (parsed) {
-      addEntry(parsed.amount, parsed.description, type);
-      e.target.value = '';
-    }
-  }
-});
-
-document.getElementById('btnIncome').addEventListener('click', () => {
-  const input = document.getElementById('input');
-  const parsed = parseInput(input.value);
-  if (parsed) {
-    addEntry(parsed.amount, parsed.description, 'income');
-    input.value = '';
-  }
-});
-
-document.getElementById('btnExpense').addEventListener('click', () => {
-  const input = document.getElementById('input');
-  const parsed = parseInput(input.value);
-  if (parsed) {
-    addEntry(parsed.amount, parsed.description, 'expense');
-    input.value = '';
-  }
-});
-
-document.getElementById('prevMonth').addEventListener('click', () => {
-  currentMonth.setMonth(currentMonth.getMonth() - 1);
-  render();
-});
-
-document.getElementById('nextMonth').addEventListener('click', () => {
-  currentMonth.setMonth(currentMonth.getMonth() + 1);
-  render();
-});
-
-function addEntry(amount, description, type) {
-  const entry = {
-    date: new Date().toISOString(),
-    amount,
-    description,
-    type
-  };
-  entries.push(entry);
-  entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-  saveToCache();
-  render();
-}
-
-function saveToCache() {
-  localStorage.setItem('balance_entries', JSON.stringify(entries));
-}
-
-function loadFromCache() {
-  const cached = localStorage.getItem('balance_entries');
-  if (cached) {
-    entries = JSON.parse(cached);
-    render();
-  }
-}
-
+// Инициализация
 async function init() {
-  loadFromCache();
-  render();
+    // Загружаем данные
+    state.transactions = await loadTransactions();
+
+    // Обновляем UI
+    updateUI(state.transactions, state.currentDate);
+    updateCalendarButton(state.selectedDate);
+
+    // Добавляем тестовые данные если пусто
+    if (state.transactions.length === 0 && CONFIG.MODE === 'local') {
+        addSampleData();
+    }
+
+    console.log('✅ Приложение загружено. Режим:', CONFIG.MODE);
 }
 
-init();
+/**
+ * Добавить тестовые данные (для демо)
+ */
+function addSampleData() {
+    const today = formatDateISO(new Date());
+    const samples = [
+        { id: 1, date: today, type: 'income', amount: 28000, desc: 'пенсия' },
+        { id: 2, date: today, type: 'income', amount: 9000, desc: 'аванс' },
+        { id: 3, date: today, type: 'expense', amount: 5653, desc: 'квартплата' },
+        { id: 4, date: today, type: 'expense', amount: 3129, desc: 'продукты, молоко, хлеб' },
+        { id: 5, date: today, type: 'expense', amount: 1549, desc: 'продукты, кефир, чай' },
+        { id: 6, date: today, type: 'expense', amount: 143, desc: 'молоко, коржик' },
+    ];
+    samples.forEach(tx => saveTransaction(tx));
+    state.transactions = getLocalTransactions();
+    updateUI(state.transactions, state.currentDate);
+}
+
+/**
+ * Парсинг ввода
+ */
+function parseInput(text) {
+    const clean = text.replace(/[^a-zA-Zа-яА-Я0-9\s.,-]/g, '').trim();
+    const numMatch = clean.match(/(\d+)/);
+
+    if (!numMatch) return { valid: false, error: 'Не найдена сумма' };
+
+    const amount = parseInt(numMatch[1]);
+    let desc = clean.replace(numMatch[1], '').replace(/\s+/g, ' ').trim();
+    desc = desc.replace(/^[.,]+|[.,]+$/g, '');
+
+    if (!desc) return { valid: false, error: 'Не указано описание' };
+    return { valid: true, amount, desc };
+}
+
+/**
+ * Добавить новую транзакцию
+ */
+async function addTransaction(type) {
+    const parsed = parseInput(els.inputField.value);
+    if (!parsed.valid) {
+        showToast('⚠️ ' + parsed.error);
+        return;
+    }
+
+    const tx = {
+        id: Date.now(),
+        date: formatDateISO(state.selectedDate),
+        type,
+        amount: parsed.amount,
+        desc: parsed.desc
+    };
+
+    await saveTransaction(tx);
+
+    // Обновляем локально для мгновенного отклика
+    state.transactions.push(tx);
+
+    // Сброс полей
+    els.inputField.value = '';
+    if (CONFIG.AUTO_RESET_DATE) {
+        state.selectedDate = new Date();
+        updateCalendarButton(state.selectedDate);
+    }
+
+    updateUI(state.transactions, state.currentDate);
+    showToast('✅ Запись добавлена');
+}
+
+/**
+ * Начало редактирования записи
+ */
+function startEdit(id) {
+    if (!state.editMode) return;
+    if (state.editingId === id) return;
+
+    state.editingId = id;
+    showToast('✏️ Редактирование. Измените и нажмите ✓');
+    updateUI(state.transactions, state.currentDate);
+
+    // Фокус на поле описания
+    setTimeout(() => {
+        const field = document.getElementById(`edit-desc-${id}`);
+        if (field) field.focus();
+    }, 100);
+}
+
+/**
+ * Изменить дату в редактируемой записи
+ */
+function editDate(id) {
+    const tx = state.transactions.find(t => t.id === id);
+    if (!tx || !tx.date) return;
+
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.value = tx.date;
+    input.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(input);
+
+    input.onchange = (e) => {
+        tx.date = e.target.value;
+        updateTransaction(tx);
+        showToast(`📅 Дата изменена на ${formatDate(new Date(tx.date))}`);
+        updateUI(state.transactions, state.currentDate);
+        document.body.removeChild(input);
+    };
+
+    input.showPicker ? input.showPicker() : input.click();
+}
+
+/**
+ * Сохранить изменения в записи
+ */
+function saveEdit(id) {
+    const amountInput = document.getElementById(`edit-amount-${id}`);
+    const descInput = document.getElementById(`edit-desc-${id}`);
+
+    const newAmount = parseInt(amountInput.value);
+    const newDesc = descInput.value.trim();
+
+    if (!newAmount || newAmount <= 0) {
+        showToast('⚠️ Введите корректную сумму');
+        return;
+    }
+    if (!newDesc) {
+        showToast('⚠️ Введите описание');
+        return;
+    }
+
+    const tx = state.transactions.find(t => t.id === id);
+    if (tx) {
+        tx.amount = newAmount;
+        tx.desc = newDesc;
+        updateTransaction(tx);
+    }
+
+    state.editingId = null;
+    showToast('✅ Изменения сохранены');
+    updateUI(state.transactions, state.currentDate);
+}
+
+/**
+ * Удалить транзакцию
+ */
+async function handleDelete(id) {
+    const tx = state.transactions.find(t => t.id === id);
+    if (!tx) return;
+
+    if (confirm(`Удалить: "${tx.desc}" ${tx.amount} ₽?`)) {
+        await deleteTransaction(id);
+        state.transactions = state.transactions.filter(t => t.id !== id);
+        if (state.editingId === id) state.editingId = null;
+        updateUI(state.transactions, state.currentDate);
+        showToast('🗑️ Запись удалена');
+    }
+}
+
+/**
+ * Голосовой ввод
+ */
+function startVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        showToast('⚠️ Голосовой ввод не поддерживается');
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ru-RU';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => showToast('🎙️ Говорите...');
+    recognition.onresult = (e) => { els.inputField.value = e.results[0][0].transcript; };
+    recognition.onerror = () => showToast('⚠️ Ошибка распознавания');
+    recognition.start();
+}
+
+/**
+ * Открыть календарь для выбора даты
+ */
+function openCalendar() {
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.value = state.selectedDate.toISOString().split('T')[0];
+    input.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(input);
+
+    input.onchange = (e) => {
+        state.selectedDate = new Date(e.target.value + 'T00:00:00');
+        updateCalendarButton(state.selectedDate);
+        showToast(`📅 Дата: ${formatDate(state.selectedDate)}`);
+        document.body.removeChild(input);
+    };
+
+    input.showPicker ? input.showPicker() : input.click();
+}
+
+// ==========================================
+// EVENT LISTENERS
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+
+    // Кнопки добавления
+    document.getElementById('btnIncome').onclick = () => addTransaction('income');
+    document.getElementById('btnExpense').onclick = () => addTransaction('expense');
+
+    // Переключение режима редактирования
+    els.editToggleBtn.onclick = () => {
+        state.editMode = !state.editMode;
+        toggleEditMode(state.editMode);
+        if (!state.editMode) {
+            state.editingId = null;
+            updateUI(state.transactions, state.currentDate);
+        }
+    };
+
+    // Календарь и голос
+    els.calendarBtn.onclick = openCalendar;
+    els.micBtn.onclick = startVoiceInput;
+
+    // Переключение месяцев
+    document.getElementById('prevMonth').onclick = () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+        updateUI(state.transactions, state.currentDate);
+    };
+    document.getElementById('nextMonth').onclick = () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+        updateUI(state.transactions, state.currentDate);
+    };
+
+    // Enter в поле ввода
+    els.inputField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTransaction('expense');
+    });
+});
+
+// Экспорт функций для inline-обработчиков в HTML
+window.startEdit = startEdit;
+window.editDate = editDate;
+window.saveEdit = saveEdit;
+window.deleteTransaction = handleDelete;

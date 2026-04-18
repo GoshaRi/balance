@@ -1,49 +1,99 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Баланс</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#fff">
-  <link rel="apple-touch-icon" href="icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#faf6f0">
+    <title>Финансы</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-  <div class="container">
-    <header class="balance-header">
-      <div class="month" id="currentMonth">Январь 2026</div>
-      <div class="balance" id="balance">0 ₽</div>
-      <div class="stats">
-        <div class="stat income">
-          <span>Приход</span>
-          <span id="income">+0 ₽</span>
+    <div class="app">
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="month-nav">
+                <button id="prevMonth">‹</button>
+                <span class="month-label" id="monthLabel">Апрель 2026</span>
+                <button id="nextMonth">›</button>
+            </div>
+            <div class="balance" id="balance">0 ₽</div>
+            <div class="stats-row">
+                <div class="stat income" id="totalIncome">+0 ₽</div>
+                <div class="divider">|</div>
+                <div class="stat expense" id="totalExpense">-0 ₽</div>
+            </div>
+            <div class="dynamic-badge">
+                <span id="dynamicVal">0 ₽</span>
+                <span class="arrow" id="dynamicArrow">→</span>
+            </div>
         </div>
-        <div class="stat expense">
-          <span>Расход</span>
-          <span id="expense">−0 ₽</span>
-        </div>
-      </div>
-    </header>
 
-    <div class="input-block">
-      <input type="text" id="input" placeholder="143 молоко" autocomplete="off">
-      <div class="buttons">
-        <button id="btnIncome" class="btn income">Доход</button>
-        <button id="btnExpense" class="btn expense">Расход</button>
-      </div>
+        <!-- Input Section -->
+        <div class="input-wrapper">
+            <button class="icon-btn" id="calendarBtn" title="Выбрать дату">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            </button>
+            <input type="text" class="input-field" id="inputField" placeholder="Сумма и описание (напр. 143 молоко)">
+            <button class="icon-btn" id="micBtn" title="Голосовой ввод">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-income" id="btnIncome">Доход</button>
+            <button class="btn btn-expense" id="btnExpense">Расход</button>
+        </div>
+
+        <!-- History -->
+        <div class="history-card" id="historyCard">
+            <div class="history-header">
+                <div class="history-title">История</div>
+                <button class="edit-toggle-btn" id="editToggleBtn" title="Редактировать">
+                    <svg id="editIcon" viewBox="0 0 24 24">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <svg id="closeIcon" viewBox="0 0 24 24" style="display:none;">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">Нет операций за этот месяц</div>
+            </div>
+        </div>
     </div>
 
-    <div class="history" id="history">
-      <div class="history-header">
-        <button id="prevMonth">&lt;</button>
-        <span>История</span>
-        <button id="nextMonth">&gt;</button>
-      </div>
-      <ul id="historyList"></ul>
-    </div>
-  </div>
+    <div class="toast" id="toast"></div>
 
-  <script src="js/app.js"></script>
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('SW registered'))
+                .catch(err => console.log('SW error:', err));
+        }
+    </script>
 </body>
+
 </html>

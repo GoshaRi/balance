@@ -7,8 +7,22 @@
  * - Кэширование
  */
 
-// Ключ для localStorage
+// Ключи для localStorage
 const STORAGE_KEY = 'finance_cache_v1';
+const DEVICE_ID_KEY = 'device_id';
+
+/**
+ * Получить или создать UUID устройства
+ * @returns {string}
+ */
+function getDeviceId() {
+    let id = localStorage.getItem(DEVICE_ID_KEY);
+    if (!id && typeof crypto !== 'undefined' && crypto.randomUUID) {
+        id = crypto.randomUUID();
+        localStorage.setItem(DEVICE_ID_KEY, id);
+    }
+    return id;
+}
 
 /**
  * Загрузка транзакций
@@ -17,8 +31,22 @@ const STORAGE_KEY = 'finance_cache_v1';
 async function loadTransactions() {
     if (CONFIG.MODE === 'sheets') {
         try {
-            const response = await fetch(CONFIG.APPS_SCRIPT_URL);
-            const data = await response.json();
+            const deviceId = getDeviceId();
+            const url = CONFIG.APPS_SCRIPT_URL + '?deviceId=' + deviceId;
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (result && result.error === 'device_not_registered') {
+                console.warn('⚠️ Устройство не зарегистрировано. UUID:', result.deviceId);
+                alert('Устройство не зарегистрировано.\nВаш UUID: ' + result.deviceId + '\nСообщите этот код владельцу.');
+                return getLocalTransactions();
+            }
+
+            if (result && result.error) {
+                throw new Error(result.error);
+            }
+
+            const data = result;
 
             // Сохраняем в кэш на случай офлайна
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -45,10 +73,12 @@ async function saveTransaction(tx) {
 
     if (CONFIG.MODE === 'sheets') {
         try {
-            // Отправляем в таблицу (без ожидания ответа для скорости)
-            fetch(CONFIG.APPS_SCRIPT_URL, {
+            const deviceId = getDeviceId();
+            const url = CONFIG.APPS_SCRIPT_URL + '?deviceId=' + deviceId;
+            // Отправляем в таблицу
+            fetch(url, {
                 method: 'POST',
-                mode: 'no-cors', // важно для Google Apps Script
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(tx)
             }).catch(err => console.warn('⚠️ Ошибка синхронизации:', err));

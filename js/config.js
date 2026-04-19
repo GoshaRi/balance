@@ -13,7 +13,7 @@ const CONFIG = {
 
     // === 📊 GOOGLE APPS SCRIPT ===
     // 🔗 ВСТАВЬТЕ СЮДА ВАШ URL (полученный после развертывания):
-    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwDZFI26wtPJ0jFIzRvv2gm5O1PBf0h7bhqluQsrI47nXfHtMMbS_XFEB8p24yguVyV/exec',
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxkzfFpP0FKNIrKjib-m-NHrNpA1J9HWzfgv9_MGgAeefJ3ICz6lPNDZxglVDjnKrHm/exec',
 
     // Название листа в таблице (по умолчанию 'Лист1')
     SHEET_NAME: 'Лист1',

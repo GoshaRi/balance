@@ -110,10 +110,12 @@ async function saveTransaction(tx) {
  * @returns {Promise<boolean>}
  */
 async function deleteTransaction(id) {
-    console.log('deleteTransaction start', id);
-    // Удаляем локально
+    const cleanId = id.toString().replace(/\s/g, '');
+    console.log('deleteTransaction start', cleanId);
+
+    // 1. Удаляем локально (фильтруем кэш)
     let local = getLocalTransactions();
-    local = local.filter(t => t.id !== id);
+    local = local.filter(t => t.id.toString().replace(/\s/g, '') !== cleanId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
 
     if (CONFIG.MODE === 'sheets') {
@@ -122,24 +124,22 @@ async function deleteTransaction(id) {
             const params = new URLSearchParams({
                 deviceId,
                 action: 'delete',
-                id: id
+                id: cleanId
             });
             const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
 
             console.log('deleteTransaction URL:', url);
             const response = await fetch(url);
-            console.log('deleteTransaction Status:', response.status);
             const result = await response.json();
             console.log('deleteTransaction Result:', result);
 
             if (result && result.error) {
-                // Откат локального удаления при ошибке
+                // Откат локального удаления при ошибке сервера
                 const restored = getLocalTransactions();
                 restored.push({ id: id });
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
                 return { success: false, error: result.error };
             }
-
             return { success: true };
         } catch (err) {
             console.warn('⚠️ Ошибка синхронизации:', err);

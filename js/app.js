@@ -266,8 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Календарь и голос
-    els.calendarBtn.onclick = openCalendar;
-    els.micBtn.onclick = startVoiceInput;
+    if (els.calendarBtn) els.calendarBtn.onclick = openCalendar;
+    if (els.micBtn) els.micBtn.onclick = startVoiceInput;
 
     // Переключение месяцев
     document.getElementById('prevMonth').onclick = () => {
@@ -289,4 +289,4 @@ document.addEventListener('DOMContentLoaded', () => {
 window.startEdit = startEdit;
 window.editDate = editDate;
 window.saveEdit = saveEdit;
-window.deleteTransaction = handleDelete;
+window.handleDelete = handleDelete;

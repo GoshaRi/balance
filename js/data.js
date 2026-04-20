@@ -85,8 +85,11 @@ async function saveTransaction(tx) {
             });
             const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
 
+            console.log('URL:', url);
             const response = await fetch(url);
+            console.log('Status:', response.status);
             const result = await response.json();
+            console.log('Result:', result);
 
             if (result && result.error) {
                 // Откат локального изменения при ошибке

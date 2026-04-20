@@ -184,7 +184,7 @@ function saveEdit(id) {
  * Удалить транзакцию
  */
 async function handleDelete(id) {
-    const tx = state.transactions.find(t => t.id === id);
+    const tx = state.transactions.find(t => String(t.id) === String(id));
     if (!tx) return;
 
     console.log('handleDelete start', id);
@@ -194,7 +194,7 @@ async function handleDelete(id) {
         console.log('deleteTransaction result:', result);
 
         if (result && result.success) {
-            state.transactions = state.transactions.filter(t => t.id !== id);
+            state.transactions = state.transactions.filter(t => String(t.id) !== String(id));
             if (state.editingId === id) state.editingId = null;
             updateUI(state.transactions, state.currentDate);
             showToast('🗑️ Запись удалена');

@@ -156,20 +156,38 @@ async function deleteTransaction(id) {
  */
 async function updateTransaction(tx) {
     let local = getLocalTransactions();
-    const idx = local.findIndex(t => t.id === tx.id);
+    const idx = local.findIndex(t => String(t.id) === String(tx.id));
 
     if (idx !== -1) {
         local[idx] = tx;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
 
-        // Синхронизация с Sheets (требует доработки скрипта для update)
         if (CONFIG.MODE === 'sheets') {
-            console.log('🔄 Обновление в Sheets пока не реализовано');
+            try {
+                const deviceId = getDeviceId();
+                const params = new URLSearchParams({
+                    deviceId,
+                    action: 'update',
+                    id: tx.id,
+                    date: tx.date,
+                    type: tx.type,
+                    amount: tx.amount,
+                    desc: tx.desc
+                });
+                const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) return true;
+            } catch (err) {
+                console.warn('⚠️ Ошибка обновления в Sheets:', err);
+            }
         }
         return true;
     }
     return false;
 }
+
 
 /**
  * Вспомогательная: получить данные из localStorage

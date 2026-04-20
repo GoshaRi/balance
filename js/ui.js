@@ -134,7 +134,7 @@ function renderHistory(transactions, editingId) {
                 <div class="history-item" onclick="window.startEdit(${t.id})">
                     <div class="item-content">
                         <div class="item-left">
-                            <span class="item-date">${t.date ? t.date.slice(5) : ''}</span>
+                            <span class="item-date">${formatDate(t.date)}</span>
                             <span class="item-desc">${t.desc}</span>
                         </div>
                         <span class="item-amount ${t.type === 'income' ? 'inc' : 'exp'}">

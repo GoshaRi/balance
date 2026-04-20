@@ -188,11 +188,17 @@ async function handleDelete(id) {
     if (!tx) return;
 
     if (confirm(`Удалить: "${tx.desc}" ${tx.amount} ₽?`)) {
-        await deleteTransaction(id);
-        state.transactions = state.transactions.filter(t => t.id !== id);
-        if (state.editingId === id) state.editingId = null;
-        updateUI(state.transactions, state.currentDate);
-        showToast('🗑️ Запись удалена');
+        const result = await deleteTransaction(id);
+
+        if (result && result.success) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            if (state.editingId === id) state.editingId = null;
+            updateUI(state.transactions, state.currentDate);
+            showToast('🗑️ Запись удалена');
+        } else {
+            // Откат удаления
+            showToast('⚠️ Ошибка: ' + (result?.error || 'Не удалось удалить'));
+        }
     }
 }
 

@@ -118,9 +118,37 @@ async function deleteTransaction(id) {
     local = local.filter(t => t.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
 
-    // ⚠️ Удаление из Google Sheets через Apps Script требует доработки скрипта
-    // Пока только локальное удаление
-    return true;
+    if (CONFIG.MODE === 'sheets') {
+        try {
+            const deviceId = getDeviceId();
+            const params = new URLSearchParams({
+                deviceId,
+                action: 'delete',
+                id: id
+            });
+            const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
+
+            console.log('URL:', url);
+            const response = await fetch(url);
+            console.log('Status:', response.status);
+            const result = await response.json();
+            console.log('Result:', result);
+
+            if (result && result.error) {
+                // Откат локального удаления при ошибке
+                const restored = getLocalTransactions();
+                restored.push({ id: id });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
+                return { success: false, error: result.error };
+            }
+
+            return { success: true };
+        } catch (err) {
+            console.warn('⚠️ Ошибка синхронизации:', err);
+            return { success: false, error: err.message };
+        }
+    }
+    return { success: true };
 }
 
 /**

@@ -35,7 +35,7 @@ const formatMoney = (num) => new Intl.NumberFormat('ru-RU').format(num) + ' ₽'
  */
 const formatDate = (date) => {
     const d = new Date(date);
-    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
 };
 
 /**

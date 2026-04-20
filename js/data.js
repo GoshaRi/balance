@@ -74,19 +74,34 @@ async function saveTransaction(tx) {
     if (CONFIG.MODE === 'sheets') {
         try {
             const deviceId = getDeviceId();
-            const url = CONFIG.APPS_SCRIPT_URL + '?deviceId=' + deviceId;
-            // Отправляем в таблицу
-            fetch(url, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(tx)
-            }).catch(err => console.warn('⚠️ Ошибка синхронизации:', err));
+            const params = new URLSearchParams({
+                deviceId,
+                action: 'add',
+                id: tx.id,
+                date: tx.date,
+                type: tx.type,
+                amount: tx.amount,
+                desc: tx.desc
+            });
+            const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
+
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (result && result.error) {
+                // Откат локального изменения при ошибке
+                const updated = getLocalTransactions().filter(t => t.id !== tx.id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                return { success: false, error: result.error };
+            }
+
+            return { success: true };
         } catch (err) {
-            console.warn('⚠️ Не удалось отправить в Sheets:', err);
+            console.warn('⚠️ Ошибка синхронизации:', err);
+            return { success: false, error: err.message };
         }
     }
-    return true;
+    return { success: true };
 }
 
 /**

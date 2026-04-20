@@ -83,20 +83,28 @@ async function addTransaction(type) {
         desc: parsed.desc
     };
 
-    await saveTransaction(tx);
+    const result = await saveTransaction(tx);
 
-    // Обновляем локально для мгновенного отклика
-    state.transactions.push(tx);
+    if (result && result.success) {
+        // Обновляем локально для мгновенного отклика
+        state.transactions.push(tx);
 
-    // Сброс полей
-    els.inputField.value = '';
-    if (CONFIG.AUTO_RESET_DATE) {
-        state.selectedDate = new Date();
-        updateCalendarButton(state.selectedDate);
+        updateUI(state.transactions, state.currentDate);
+
+        // Сброс полей
+        els.inputField.value = '';
+        if (CONFIG.AUTO_RESET_DATE) {
+            state.selectedDate = new Date();
+            updateCalendarButton(state.selectedDate);
+        }
+
+        showToast('✅ Запись добавлена');
+    } else {
+        // Откат локального изменения
+        state.transactions = state.transactions.filter(t => t.id !== tx.id);
+        updateUI(state.transactions, state.currentDate);
+        showToast('⚠️ Ошибка: ' + (result?.error || 'Не удалось добавить'));
     }
-
-    updateUI(state.transactions, state.currentDate);
-    showToast('✅ Запись добавлена');
 }
 
 /**

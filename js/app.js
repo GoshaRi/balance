@@ -112,10 +112,14 @@ async function addTransaction(type) {
  */
 function startEdit(id) {
     if (!state.editMode) return;
-    if (state.editingId === id) return;
+
+    // Приводим к строке, чтобы сравнение всегда было точным
+    if (String(state.editingId) === String(id)) return;
 
     state.editingId = id;
     showToast('✏️ Редактирование. Измените и нажмите ✓');
+
+    // ВАЖНО: Перерисовываем интерфейс, чтобы появились инпуты
     updateUI(state.transactions, state.currentDate);
 
     // Фокус на поле описания
@@ -129,8 +133,13 @@ function startEdit(id) {
  * Изменить дату в редактируемой записи
  */
 function editDate(id) {
-    const tx = state.transactions.find(t => t.id === id);
-    if (!tx || !tx.date) return;
+    // Исправлено: поиск с приведением к строке
+    const tx = state.transactions.find(t => String(t.id) === String(id));
+
+    if (!tx || !tx.date) {
+        console.error('Запись не найдена для редактирования даты:', id);
+        return;
+    }
 
     const input = document.createElement('input');
     input.type = 'date';
@@ -156,6 +165,9 @@ function saveEdit(id) {
     const amountInput = document.getElementById(`edit-amount-${id}`);
     const descInput = document.getElementById(`edit-desc-${id}`);
 
+    // Если поля не найдены, прерываем выполнение
+    if (!amountInput || !descInput) return;
+
     const newAmount = parseInt(amountInput.value);
     const newDesc = descInput.value.trim();
 
@@ -168,17 +180,22 @@ function saveEdit(id) {
         return;
     }
 
-    const tx = state.transactions.find(t => t.id === id);
+    // Ищем транзакцию, приводя оба ID к строке (защита от длинных чисел)
+    const tx = state.transactions.find(t => String(t.id) === String(id));
+
     if (tx) {
         tx.amount = newAmount;
         tx.desc = newDesc;
+        // Отправляем обновленные данные в кэш и в Google Таблицы
         updateTransaction(tx);
+        showToast('✅ Изменения сохранены');
     }
 
+    // Выходим из режима редактирования строки и обновляем UI
     state.editingId = null;
-    showToast('✅ Изменения сохранены');
     updateUI(state.transactions, state.currentDate);
 }
+
 
 /**
  * Удалить транзакцию

@@ -99,7 +99,7 @@ function updateUI(transactions, currentDate) {
     els.dynamicArrow.textContent = dynamic >= 0 ? '↑' : '↓';
     els.dynamicArrow.style.color = dynamic >= 0 ? 'var(--dynamic)' : 'var(--expense)';
 
-    renderHistory(monthTx);
+    renderHistory(monthTx, state.editingId);
 }
 
 /**
@@ -112,17 +112,20 @@ function renderHistory(transactions, editingId) {
     }
 
     els.historyList.innerHTML = transactions.map(t => {
-        if (editingId === t.id) {
+        // Сравнение через == чтобы не зависеть от типа данных
+        if (editingId == t.id) {
             // Режим редактирования
             return `
                 <div class="history-item">
                     <div class="edit-inline">
-                        <button class="edit-date-btn" onclick="window.editDate(${t.id})" title="Изменить дату">
+                        <!-- ДОБАВИЛИ КАВЫЧКИ -->
+                        <button class="edit-date-btn" onclick="window.editDate('${t.id}')" title="Изменить дату">
                             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </button>
                         <input type="number" class="edit-amount" id="edit-amount-${t.id}" value="${t.amount}" placeholder="Сумма">
                         <input type="text" class="edit-desc" id="edit-desc-${t.id}" value="${t.desc}" placeholder="Описание">
-                        <button class="edit-save-btn" onclick="window.saveEdit(${t.id})" title="Сохранить">
+                        <!-- ДОБАВИЛИ КАВЫЧКИ -->
+                        <button class="edit-save-btn" onclick="window.saveEdit('${t.id}')" title="Сохранить">
                             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                         </button>
                     </div>
@@ -130,8 +133,9 @@ function renderHistory(transactions, editingId) {
             `;
         } else {
             // Обычный вид
+            // ДОБАВИЛИ КАВЫЧКИ В startEdit
             return `
-                <div class="history-item" onclick="window.startEdit(${t.id})">
+                <div class="history-item" onclick="window.startEdit('${t.id}')">
                     <div class="item-content">
                         <div class="item-left">
                             <span class="item-date">${formatDate(t.date)}</span>
@@ -149,6 +153,7 @@ function renderHistory(transactions, editingId) {
         }
     }).join('');
 }
+
 
 /**
  * Обновить состояние кнопки календаря

@@ -187,8 +187,11 @@ async function handleDelete(id) {
     const tx = state.transactions.find(t => t.id === id);
     if (!tx) return;
 
+    console.log('handleDelete start', id);
     if (confirm(`Удалить: "${tx.desc}" ${tx.amount} ₽?`)) {
+        console.log('confirm OK');
         const result = await deleteTransaction(id);
+        console.log('deleteTransaction result:', result);
 
         if (result && result.success) {
             state.transactions = state.transactions.filter(t => t.id !== id);

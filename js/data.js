@@ -85,11 +85,8 @@ async function saveTransaction(tx) {
             });
             const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
 
-            console.log('URL:', url);
             const response = await fetch(url);
-            console.log('Status:', response.status);
             const result = await response.json();
-            console.log('Result:', result);
 
             if (result && result.error) {
                 // Откат локального изменения при ошибке
@@ -113,6 +110,7 @@ async function saveTransaction(tx) {
  * @returns {Promise<boolean>}
  */
 async function deleteTransaction(id) {
+    console.log('deleteTransaction start', id);
     // Удаляем локально
     let local = getLocalTransactions();
     local = local.filter(t => t.id !== id);
@@ -128,11 +126,11 @@ async function deleteTransaction(id) {
             });
             const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
 
-            console.log('URL:', url);
+            console.log('deleteTransaction URL:', url);
             const response = await fetch(url);
-            console.log('Status:', response.status);
+            console.log('deleteTransaction Status:', response.status);
             const result = await response.json();
-            console.log('Result:', result);
+            console.log('deleteTransaction Result:', result);
 
             if (result && result.error) {
                 // Откат локального удаления при ошибке

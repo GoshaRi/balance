@@ -237,31 +237,25 @@ async function handleDelete(id) {
  * Голосовой ввод
  */
 function startVoiceInput() {
-    console.log('🎙️ Попытка запуска голосового ввода...');
-
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     if (!SpeechRecognition) {
-        alert('⚠️ Ваш браузер не поддерживает голосовой ввод. Используйте Chrome или Samsung Browser.');
+        showToast('⚠️ Голос не поддерживается');
         return;
     }
 
-    // Создаем экземпляр КАЖДЫЙ РАЗ при клике (важно для Android)
     const recognition = new SpeechRecognition();
     recognition.lang = 'ru-RU';
     recognition.interimResults = false;
     recognition.continuous = false;
 
     recognition.onstart = () => {
-        console.log('✅ Микрофон активирован');
         showToast('🎙️ Слушаю... Говорите');
-        if (els.micBtn) els.micBtn.style.color = '#ff4444';
+        if (els.micBtn) els.micBtn.style.backgroundColor = '#ffcdd2'; // Светло-красный фон
     };
 
     recognition.onresult = (event) => {
+        // Достаем текст из результата
         const result = event.results[0][0].transcript;
-        console.log('✨ Распознано:', result);
-
         if (els.inputField) {
             els.inputField.value = result;
             els.inputField.focus();
@@ -270,31 +264,26 @@ function startVoiceInput() {
     };
 
     recognition.onerror = (err) => {
-        console.error('❌ Ошибка распознавания:', err.error);
-        if (err.error === 'not-allowed') {
-            alert('Доступ к микрофону заблокирован. Нажмите на иконку "замочка" в адресной строке и разрешите микрофон.');
-        } else if (err.error === 'network') {
-            showToast('⚠️ Ошибка сети. Проверьте интернет.');
-        } else {
-            showToast('⚠️ Ошибка: ' + err.error);
+        console.error('Speech error:', err.error);
+        if (els.micBtn) els.micBtn.style.backgroundColor = '';
+
+        if (err.error === 'no-speech') {
+            showToast('⚠️ Не слышу вас, попробуйте еще раз');
+        } else if (err.error === 'not-allowed') {
+            alert('Нужно разрешить микрофон в настройках браузера (нажмите на замочек)');
         }
-        if (els.micBtn) els.micBtn.style.color = '';
     };
 
     recognition.onend = () => {
-        console.log('🎙️ Сессия завершена');
-        if (els.micBtn) els.micBtn.style.color = '';
+        if (els.micBtn) els.micBtn.style.backgroundColor = '';
     };
 
-    // Пытаемся запустить
     try {
         recognition.start();
     } catch (e) {
-        console.warn('⚠️ Ошибка при старте:', e);
-        recognition.stop(); // Если уже запущен — стопаем и пробуем еще раз
+        recognition.stop();
     }
 }
-
 
 /**
  * Открыть календарь для выбора даты (фикс для мобильных)

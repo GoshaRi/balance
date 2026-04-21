@@ -1,6 +1,6 @@
 {
-    "name": "Финансы",
-    "short_name": "Финансы",
+    "name": "Баланс",
+    "short_name": "Баланс",
     "description": "Приложение для учета финансов",
     "start_url": "./",
     "display": "standalone",

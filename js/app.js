@@ -139,32 +139,34 @@ function editDate(id) {
     const picker = document.getElementById('hiddenDatePicker');
     if (!picker) return;
 
-    // Сбрасываем значение перед установкой, чтобы onchange срабатывал всегда
-    picker.value = '';
-    picker.value = tx.date.substring(0, 10);
+    // 1. Сначала подготавливаем данные
+    picker.value = tx.date.split('T')[0];
 
+    // 2. Сразу вешаем обработчик
     picker.onchange = (e) => {
         if (e.target.value) {
             tx.date = e.target.value;
             updateTransaction(tx);
-            showToast(`📅 Дата изменена: ${formatDate(new Date(tx.date))}`);
+            // Для корректного показа в уведомлении добавляем время T00:00:00
+            showToast(`📅 Дата изменена: ${formatDate(new Date(tx.date + 'T00:00:00'))}`);
             updateUI(state.transactions, state.currentDate);
         }
+        picker.onchange = null;
     };
 
-    // Очередность вызова критична для мобильных браузеров
+    // 3. Вызываем календарь БЕЗ задержек (прямо в потоке клика)
     try {
-        picker.focus(); // Сначала фокус
         if (picker.showPicker) {
-            picker.showPicker(); // Затем метод Chrome/Android
+            picker.showPicker();
         } else {
-            picker.click(); // Фоллбэк
+            picker.click();
         }
     } catch (err) {
-        console.warn('Ошибка вызова календаря:', err);
+        // Если браузер всё еще капризничает, пробуем через click
         picker.click();
     }
 }
+
 
 
 /**

@@ -166,14 +166,15 @@ async function updateTransaction(tx) {
             try {
                 const deviceId = getDeviceId();
 
-                // Очищаем дату от формата ISO (берем только первые 10 символов: ГГГГ-ММ-ДД)
-                const shortDate = tx.date.substring(0, 10);
+                // ГАРАНТИРУЕМ, что берем только дату ГГГГ-ММ-ДД
+                // split('T')[0] отсечет всё лишнее (время, пояса, "Z")
+                const safeDate = tx.date.split('T')[0];
 
                 const params = new URLSearchParams({
                     deviceId,
                     action: 'update',
                     id: tx.id,
-                    date: shortDate, // Используем очищенную дату
+                    date: safeDate,
                     type: tx.type,
                     amount: tx.amount,
                     desc: tx.desc

@@ -23,8 +23,11 @@ body {
     font-family: 'Montserrat', sans-serif;
     background: var(--bg);
     color: var(--text-main);
-    min-height: 100vh;
-    padding: 20px 16px 40px;
+    height: 100vh;
+    /* Фиксируем высоту на весь экран */
+    overflow: hidden;
+    /* Запрещаем скролл всей страницы */
+    padding: 0 16px;
     display: flex;
     justify-content: center;
     -webkit-font-smoothing: antialiased;
@@ -43,9 +46,13 @@ h1,
 .app {
     width: 100%;
     max-width: 400px;
+    height: 100vh;
+    /* Приложение тоже на весь экран */
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    gap: 15px;
 }
 
 /* Balance Card */
@@ -261,14 +268,40 @@ h1,
 /* History */
 .history-card {
     background: white;
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-top: -45px;
-    box-shadow: var(--shadow);
-    z-index: 1;
+    border-radius: 24px 24px 0 0;
+    /* Скруглим верх, чтобы снизу прилегало к экрану */
+    padding: 20px 20px 0 20px;
+    display: flex;
+    flex-direction: column;
     flex: 1;
-    min-height: 200px;
-    transition: all 0.3s ease;
+    min-height: 0;
+    margin-top: 10px;
+    z-index: 1;
+    box-shadow: var(--shadow);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    /* ВКЛЮЧАЕМ СКРОЛЛ только тут */
+    flex: 1;
+    padding-right: 4px;
+    /* Отступ для красивого скроллбара */
+
+    /* Плавная прокрутка для мобильных */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Настроим скроллбар, чтобы он был тонким и аккуратным */
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
 }
 
 .history-header {

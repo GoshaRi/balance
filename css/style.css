@@ -336,6 +336,11 @@ h1,
     transition: all 0.2s;
     position: relative;
     background: white;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.history-item:last-child {
+    border-bottom: none;
 }
 
 .history-card.edit-mode .history-item {

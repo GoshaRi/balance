@@ -254,23 +254,37 @@ function startVoiceInput() {
 }
 
 /**
- * Открыть календарь для выбора даты
+ * Открыть календарь для выбора даты (фикс для мобильных)
  */
 function openCalendar() {
-    const input = document.createElement('input');
-    input.type = 'date';
-    input.value = state.selectedDate.toISOString().split('T')[0];
-    input.style.cssText = 'position:fixed;opacity:0;';
-    document.body.appendChild(input);
+    // Используем уже созданный скрытый инпут
+    const picker = document.getElementById('hiddenDatePicker');
+    if (!picker) return;
 
-    input.onchange = (e) => {
-        state.selectedDate = new Date(e.target.value + 'T00:00:00');
-        updateCalendarButton(state.selectedDate);
-        showToast(`📅 Дата: ${formatDate(state.selectedDate)}`);
-        document.body.removeChild(input);
+    // Устанавливаем текущую выбранную дату из состояния (ГГГГ-ММ-ДД)
+    picker.value = state.selectedDate.toISOString().split('T')[0];
+
+    picker.onchange = (e) => {
+        if (e.target.value) {
+            // Устанавливаем дату с учетом локального времени (T00:00:00)
+            state.selectedDate = new Date(e.target.value + 'T00:00:00');
+            updateCalendarButton(state.selectedDate);
+            showToast(`📅 Дата: ${formatDate(state.selectedDate)}`);
+        }
+        picker.onchange = null;
     };
 
-    input.showPicker ? input.showPicker() : input.click();
+    // Вызываем календарь напрямую (без таймаутов для Android/iOS)
+    try {
+        if (picker.showPicker) {
+            picker.showPicker();
+        } else {
+            picker.focus();
+            picker.click();
+        }
+    } catch (err) {
+        picker.click();
+    }
 }
 
 // ==========================================

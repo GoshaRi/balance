@@ -136,13 +136,13 @@ function editDate(id) {
     const tx = state.transactions.find(t => String(t.id) === String(id));
     if (!tx) return;
 
-    const picker = document.getElementById('mobileDatePicker');
+    const picker = document.getElementById('hiddenDatePicker');
     if (!picker) return;
 
-    // Устанавливаем текущую дату (берем только ГГГГ-ММ-ДД)
+    // Сбрасываем значение перед установкой, чтобы onchange срабатывал всегда
+    picker.value = '';
     picker.value = tx.date.substring(0, 10);
 
-    // Вешаем обработчик события
     picker.onchange = (e) => {
         if (e.target.value) {
             tx.date = e.target.value;
@@ -150,17 +150,22 @@ function editDate(id) {
             showToast(`📅 Дата изменена: ${formatDate(new Date(tx.date))}`);
             updateUI(state.transactions, state.currentDate);
         }
-        picker.onchange = null; // Очищаем обработчик
     };
 
-    // Комбинированный вызов для всех типов телефонов
-    if (picker.showPicker) {
-        picker.showPicker();
-    } else {
-        picker.focus();
+    // Очередность вызова критична для мобильных браузеров
+    try {
+        picker.focus(); // Сначала фокус
+        if (picker.showPicker) {
+            picker.showPicker(); // Затем метод Chrome/Android
+        } else {
+            picker.click(); // Фоллбэк
+        }
+    } catch (err) {
+        console.warn('Ошибка вызова календаря:', err);
         picker.click();
     }
 }
+
 
 /**
  * Сохранить изменения в записи

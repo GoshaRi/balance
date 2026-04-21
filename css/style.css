@@ -335,7 +335,7 @@ h1,
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
-    background: white;
+    background: rgb(230, 230, 230);
     margin-bottom: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

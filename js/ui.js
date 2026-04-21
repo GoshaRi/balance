@@ -94,8 +94,15 @@ function updateUI(transactions, currentDate) {
 
     const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
     const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
+
+    // Считаем заработок месяца (игнорируем доходы, начинающиеся со слова "остаток")
+    const earningsOnly = monthTx
+        .filter(t => t.type === 'income' && !t.desc.toLowerCase().trim().startsWith('остаток'))
+        .reduce((s, t) => s + (t.amount || 0), 0);
+
     const balance = income - expense;
-    const dynamic = balance;
+    const dynamic = earningsOnly - expense;
+
 
     els.monthLabel.textContent = getMonthName(currentDate);
     els.balance.textContent = formatMoney(balance);

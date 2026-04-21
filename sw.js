@@ -3,7 +3,7 @@
  */
 
 /*const CACHE_NAME = 'finance-app-v' + Date.now();*/
-const CACHE_NAME = 'finance-app-v1.2' + Date.now();
+const CACHE_NAME = 'finance-app-v1.2';
 const ASSETS = [
     '/',
     '/index.html',

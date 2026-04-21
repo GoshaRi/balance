@@ -239,7 +239,7 @@ async function handleDelete(id) {
 function startVoiceInput() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        showToast('⚠️ Голосовой ввод не поддерживается');
+        showToast('⚠️ Голос не поддерживается в этом браузере');
         return;
     }
 
@@ -247,9 +247,34 @@ function startVoiceInput() {
     recognition.lang = 'ru-RU';
     recognition.interimResults = false;
 
-    recognition.onstart = () => showToast('🎙️ Говорите...');
-    recognition.onresult = (e) => { els.inputField.value = e.results[0][0].transcript; };
-    recognition.onerror = () => showToast('⚠️ Ошибка распознавания');
+    recognition.onstart = () => {
+        showToast('🎙️ Слушаю... Назовите сумму и товар');
+        els.micBtn.style.color = 'var(--expense)'; // Подсветим кнопку красным пока слушаем
+    };
+
+    recognition.onresult = (e) => {
+        const result = e.results[0][0].transcript;
+        els.inputField.value = result;
+        els.micBtn.style.color = ''; // Возвращаем цвет
+        showToast('✨ Распознано: ' + result);
+
+        // Фокусируемся на поле, чтобы мама могла сразу нажать "Расход"
+        els.inputField.focus();
+    };
+
+    recognition.onerror = (event) => {
+        els.micBtn.style.color = '';
+        if (event.error === 'not-allowed') {
+            showToast('⚠️ Разрешите доступ к микрофону');
+        } else {
+            showToast('⚠️ Ошибка записи: ' + event.error);
+        }
+    };
+
+    recognition.onend = () => {
+        els.micBtn.style.color = '';
+    };
+
     recognition.start();
 }
 

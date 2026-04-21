@@ -237,46 +237,55 @@ async function handleDelete(id) {
  * Голосовой ввод
  */
 function startVoiceInput() {
+    // Поддержка разных браузеров
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
     if (!SpeechRecognition) {
-        showToast('⚠️ Голос не поддерживается в этом браузере');
+        showToast('⚠️ Голос не поддерживается');
         return;
     }
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'ru-RU';
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-        showToast('🎙️ Слушаю... Назовите сумму и товар');
-        els.micBtn.style.color = 'var(--expense)'; // Подсветим кнопку красным пока слушаем
+        showToast('🎙️ Слушаю... Говорите');
+        if (els.micBtn) els.micBtn.classList.add('recording'); // Можно добавить пульсацию в CSS
     };
 
-    recognition.onresult = (e) => {
-        const result = e.results[0][0].transcript;
-        els.inputField.value = result;
-        els.micBtn.style.color = ''; // Возвращаем цвет
-        showToast('✨ Распознано: ' + result);
+    recognition.onresult = (event) => {
+        // ПРАВИЛЬНЫЙ ПУТЬ К ТЕКСТУ:
+        const result = event.results[0][0].transcript;
 
-        // Фокусируемся на поле, чтобы мама могла сразу нажать "Расход"
-        els.inputField.focus();
+        if (els.inputField) {
+            els.inputField.value = result;
+            els.inputField.focus();
+            showToast('✨ Готово: ' + result);
+        }
     };
 
-    recognition.onerror = (event) => {
-        els.micBtn.style.color = '';
-        if (event.error === 'not-allowed') {
-            showToast('⚠️ Разрешите доступ к микрофону');
+    recognition.onerror = (err) => {
+        console.error('Speech error:', err.error);
+        if (err.error === 'not-allowed') {
+            alert('Нужно разрешить доступ к микрофону в настройках браузера (нажмите на замочек в адресной строке)');
         } else {
-            showToast('⚠️ Ошибка записи: ' + event.error);
+            showToast('⚠️ Ошибка: ' + err.error);
         }
     };
 
     recognition.onend = () => {
-        els.micBtn.style.color = '';
+        if (els.micBtn) els.micBtn.classList.remove('recording');
     };
 
-    recognition.start();
+    try {
+        recognition.start();
+    } catch (e) {
+        console.error('Recognition already started', e);
+    }
 }
+
 
 /**
  * Открыть календарь для выбора даты (фикс для мобильных)

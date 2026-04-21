@@ -238,52 +238,42 @@ async function handleDelete(id) {
  */
 function startVoiceInput() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        showToast('⚠️ Голос не поддерживается');
-        return;
-    }
+    if (!SpeechRecognition) return;
 
+    // Создаем объект строго в момент клика
     const recognition = new SpeechRecognition();
     recognition.lang = 'ru-RU';
-    recognition.interimResults = false;
+
+    // На Андроиде true иногда работает стабильнее, не давая обрывать связь
+    recognition.interimResults = true;
     recognition.continuous = false;
 
     recognition.onstart = () => {
-        showToast('🎙️ Слушаю... Говорите');
-        if (els.micBtn) els.micBtn.style.backgroundColor = '#ffcdd2'; // Светло-красный фон
+        showToast('🎙️ Слушаю...');
+        if (els.micBtn) els.micBtn.style.boxShadow = '0 0 15px rgba(255,0,0,0.5)';
     };
 
     recognition.onresult = (event) => {
-        // Достаем текст из результата
-        const result = event.results[0][0].transcript;
+        // Берем самый свежий результат
+        const result = event.results[event.results.length - 1][0].transcript;
         if (els.inputField) {
             els.inputField.value = result;
-            els.inputField.focus();
-            showToast('✨ ' + result);
         }
     };
 
     recognition.onerror = (err) => {
-        console.error('Speech error:', err.error);
-        if (els.micBtn) els.micBtn.style.backgroundColor = '';
-
-        if (err.error === 'no-speech') {
-            showToast('⚠️ Не слышу вас, попробуйте еще раз');
-        } else if (err.error === 'not-allowed') {
-            alert('Нужно разрешить микрофон в настройках браузера (нажмите на замочек)');
-        }
+        console.log('Voice Error:', err.error);
+        if (err.error === 'not-allowed') alert('Дайте разрешение под замочком!');
     };
 
     recognition.onend = () => {
-        if (els.micBtn) els.micBtn.style.backgroundColor = '';
+        if (els.micBtn) els.micBtn.style.boxShadow = '';
+        showToast('✅ Готово');
     };
 
-    try {
-        recognition.start();
-    } catch (e) {
-        recognition.stop();
-    }
+    recognition.start();
 }
+
 
 /**
  * Открыть календарь для выбора даты (фикс для мобильных)

@@ -335,9 +335,9 @@ h1,
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
-    background: rgb(230, 230, 230);
+    background: rgb(212, 212, 212);
     margin-bottom: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .history-card.edit-mode .history-item {

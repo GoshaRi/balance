@@ -23,6 +23,7 @@ const els = {
     editIcon: document.getElementById('editIcon'),
     closeIcon: document.getElementById('closeIcon'),
     toast: document.getElementById('toast'),
+    micBtn: document.getElementById('micBtn'),
 };
 
 /**

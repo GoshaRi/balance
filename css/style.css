@@ -310,7 +310,9 @@ h1,
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
-    padding-top: 26px;
+    padding-top: 20px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #b6c9a7;
 }
 
 .history-title {

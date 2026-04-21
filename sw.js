@@ -2,8 +2,8 @@
  * 🔧 Service Worker для офлайн-работы и PWA
  */
 
-/*const CACHE_NAME = 'finance-app-v' + Date.now();*/
-const CACHE_NAME = 'finance-app-v1.1' + Date.now();
+const CACHE_NAME = 'finance-app-v' + Date.now();
+/*const CACHE_NAME = 'finance-app-v1.1' + Date.now();*/
 const ASSETS = [
     '/',
     '/index.html',

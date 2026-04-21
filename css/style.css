@@ -9,7 +9,7 @@
     --edit-bg: #e8f4f8;
     --toast-bg: #fff8e1;
     --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-    --radius: 0 0 60px 60px;
+    --radius: 0 0 24px 24px;
 }
 
 * {
@@ -51,7 +51,7 @@ h1,
 /* Balance Card */
 .balance-card {
     background: var(--card-bg);
-    border-radius: var(--radius);
+    border-radius: 0 0 60px 60px;
     padding: 10px 14px;
     max-width: 360px;
     margin: 10px auto;

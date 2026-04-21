@@ -84,7 +84,13 @@ function updateUI(transactions, currentDate) {
     const key = getMonthKey(currentDate);
     const monthTx = transactions
         .filter(t => t.date && t.date.startsWith(key))
-        .sort((a, b) => b.id - a.id);
+        .sort((a, b) => {
+            // Сначала по дате (от новых к старым)
+            const dateDiff = new Date(b.date) - new Date(a.date);
+            if (dateDiff !== 0) return dateDiff;
+            // Если даты равны, по времени добавления (ID)
+            return b.id - a.id;
+        });
 
     const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
     const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);

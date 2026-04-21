@@ -62,6 +62,11 @@ h1,
         0 4px 24px rgba(0, 0, 0, 0.12),
         inset 0 6px 6px 0px rgba(0, 0, 0, 0.12);
     position: relative;
+    touch-action: pan-y;
+    /* Разрешаем скролл вверх-вниз, блокируем системный свайп влево-вправо */
+    user-select: none;
+    /* Убираем выделение текста при долгом нажатии */
+    -webkit-user-select: none;
 }
 
 .month-nav {

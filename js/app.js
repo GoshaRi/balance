@@ -342,6 +342,31 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentDate.setMonth(state.currentDate.getMonth() + 1);
         updateUI(state.transactions, state.currentDate);
     };
+    // Свайп по карточке баланса
+    const card = document.querySelector('.balance-card');
+    let xDown = null;
+
+    card.addEventListener('touchstart', e => {
+        xDown = e.touches[0].clientX;
+    }, { passive: true });
+
+    card.addEventListener('touchend', e => {
+        if (!xDown) return;
+        let xUp = e.changedTouches[0].clientX;
+        let xDiff = xDown - xUp;
+
+        if (Math.abs(xDiff) > 50) { // порог свайпа
+            if (xDiff > 0) {
+                // Свайп влево -> следующий месяц
+                state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+            } else {
+                // Свайп вправо -> предыдущий месяц
+                state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+            }
+            updateUI(state.transactions, state.currentDate);
+        }
+        xDown = null;
+    }, { passive: true });
 
     // Enter в поле ввода
     els.inputField.addEventListener('keypress', (e) => {

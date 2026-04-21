@@ -165,11 +165,15 @@ async function updateTransaction(tx) {
         if (CONFIG.MODE === 'sheets') {
             try {
                 const deviceId = getDeviceId();
+
+                // Очищаем дату от формата ISO (берем только первые 10 символов: ГГГГ-ММ-ДД)
+                const shortDate = tx.date.substring(0, 10);
+
                 const params = new URLSearchParams({
                     deviceId,
                     action: 'update',
                     id: tx.id,
-                    date: tx.date,
+                    date: shortDate, // Используем очищенную дату
                     type: tx.type,
                     amount: tx.amount,
                     desc: tx.desc
@@ -187,6 +191,7 @@ async function updateTransaction(tx) {
     }
     return false;
 }
+
 
 
 /**

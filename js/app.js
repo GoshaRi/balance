@@ -130,32 +130,36 @@ function startEdit(id) {
 }
 
 /**
- * Изменить дату в редактируемой записи
+ * Изменить дату в редактируемой записи (фикс для мобильных)
  */
 function editDate(id) {
-    // Исправлено: поиск с приведением к строке
     const tx = state.transactions.find(t => String(t.id) === String(id));
+    if (!tx) return;
 
-    if (!tx || !tx.date) {
-        console.error('Запись не найдена для редактирования даты:', id);
-        return;
-    }
+    const picker = document.getElementById('mobileDatePicker');
+    if (!picker) return;
 
-    const input = document.createElement('input');
-    input.type = 'date';
-    input.value = tx.date;
-    input.style.cssText = 'position:fixed;opacity:0;';
-    document.body.appendChild(input);
+    // Устанавливаем текущую дату (берем только ГГГГ-ММ-ДД)
+    picker.value = tx.date.substring(0, 10);
 
-    input.onchange = (e) => {
-        tx.date = e.target.value;
-        updateTransaction(tx);
-        showToast(`📅 Дата изменена на ${formatDate(new Date(tx.date))}`);
-        updateUI(state.transactions, state.currentDate);
-        document.body.removeChild(input);
+    // Вешаем обработчик события
+    picker.onchange = (e) => {
+        if (e.target.value) {
+            tx.date = e.target.value;
+            updateTransaction(tx);
+            showToast(`📅 Дата изменена: ${formatDate(new Date(tx.date))}`);
+            updateUI(state.transactions, state.currentDate);
+        }
+        picker.onchange = null; // Очищаем обработчик
     };
 
-    input.showPicker ? input.showPicker() : input.click();
+    // Комбинированный вызов для всех типов телефонов
+    if (picker.showPicker) {
+        picker.showPicker();
+    } else {
+        picker.focus();
+        picker.click();
+    }
 }
 
 /**

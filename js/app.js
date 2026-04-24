@@ -15,14 +15,28 @@ const state = {
 
 // Инициализация
 async function init() {
-    // Загружаем данные
-    state.transactions = await loadTransactions();
+    // 1. Мгновенно загружаем данные из кэша телефона
+    state.transactions = getLocalTransactions() || [];
 
-    // Обновляем UI
+    // 2. Сразу отрисовываем UI, чтобы не было "пустого экрана"
     updateUI(state.transactions, state.currentDate);
     updateCalendarButton(state.selectedDate);
 
-    // Добавляем тестовые данные если пусто
+    // 3. В фоне идем в Google Таблицы за свежими данными
+    try {
+        const freshData = await loadTransactions();
+
+        // Если данные с сервера пришли и они отличаются (или просто загрузились)
+        if (freshData && Array.isArray(freshData)) {
+            state.transactions = freshData;
+            // 4. Тихо обновляем интерфейс актуальными данными
+            updateUI(state.transactions, state.currentDate);
+        }
+    } catch (err) {
+        console.warn('Работаем в офлайн режиме или ошибка сети');
+    }
+
+    // Тестовые данные (только для локального режима, если совсем пусто)
     if (state.transactions.length === 0 && CONFIG.MODE === 'local') {
         addSampleData();
     }

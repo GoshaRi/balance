@@ -75,6 +75,11 @@ async function addTransaction(type) {
         return;
     }
 
+    // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+    triggerHaptic(); // Вибро при нажатии
+    setButtonLoading(type, true); // Включаем спиннер и блокировку
+    // ------------------------
+
     const tx = {
         id: Date.now(),
         date: formatDateISO(state.selectedDate),
@@ -83,29 +88,31 @@ async function addTransaction(type) {
         desc: parsed.desc
     };
 
-    const result = await saveTransaction(tx);
+    try {
+        const result = await saveTransaction(tx);
 
-    if (result && result.success) {
-        // Обновляем локально для мгновенного отклика
-        state.transactions.push(tx);
+        if (result && result.success) {
+            state.transactions.push(tx);
+            updateUI(state.transactions, state.currentDate);
 
-        updateUI(state.transactions, state.currentDate);
-
-        // Сброс полей
-        els.inputField.value = '';
-        if (CONFIG.AUTO_RESET_DATE) {
-            state.selectedDate = new Date();
-            updateCalendarButton(state.selectedDate);
+            els.inputField.value = '';
+            if (CONFIG.AUTO_RESET_DATE) {
+                state.selectedDate = new Date();
+                updateCalendarButton(state.selectedDate);
+            }
+            showToast('✅ Запись добавлена');
+        } else {
+            showToast('⚠️ Ошибка: ' + (result?.error || 'Не удалось добавить'));
         }
-
-        showToast('✅ Запись добавлена');
-    } else {
-        // Откат локального изменения
-        state.transactions = state.transactions.filter(t => t.id !== tx.id);
-        updateUI(state.transactions, state.currentDate);
-        showToast('⚠️ Ошибка: ' + (result?.error || 'Не удалось добавить'));
+    } catch (err) {
+        showToast('⚠️ Ошибка сети');
+    } finally {
+        // --- ЗАВЕРШЕНИЕ ИЗМЕНЕНИЙ ---
+        setButtonLoading(type, false); // Выключаем спиннер в любом случае
+        // ----------------------------
     }
 }
+
 
 /**
  * Начало редактирования записи
@@ -197,6 +204,7 @@ function saveEdit(id) {
         tx.desc = newDesc;
         // Отправляем обновленные данные в кэш и в Google Таблицы
         updateTransaction(tx);
+        triggerHaptic();
         showToast('✅ Изменения сохранены');
     }
 
@@ -204,7 +212,6 @@ function saveEdit(id) {
     state.editingId = null;
     updateUI(state.transactions, state.currentDate);
 }
-
 
 /**
  * Удалить транзакцию
@@ -215,6 +222,7 @@ async function handleDelete(id) {
 
     console.log('handleDelete start', id);
     if (confirm(`Удалить: "${tx.desc}" ${tx.amount} ₽?`)) {
+        triggerHaptic();
         console.log('confirm OK');
         const result = await deleteTransaction(id);
         console.log('deleteTransaction result:', result);

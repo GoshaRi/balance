@@ -24,6 +24,8 @@ const els = {
     closeIcon: document.getElementById('closeIcon'),
     toast: document.getElementById('toast'),
     micBtn: document.getElementById('micBtn'),
+    btnIncome: document.getElementById('btnIncome'),
+    btnExpense: document.getElementById('btnExpense'),
 };
 
 /**
@@ -196,5 +198,37 @@ function toggleEditMode(isActive) {
         els.editIcon.style.display = 'block';
         els.closeIcon.style.display = 'none';
         showToast('Редактирование завершено');
+    }
+}
+
+/**
+ * Управление состоянием загрузки кнопок
+ */
+function setButtonLoading(type, isLoading) {
+    const btn = type === 'income' ? els.btnIncome : els.btnExpense;
+    const otherBtn = type === 'income' ? els.btnExpense : els.btnIncome;
+    const originalText = type === 'income' ? 'Доход' : 'Расход';
+
+    if (isLoading) {
+        // Блокируем обе кнопки
+        btn.disabled = true;
+        otherBtn.disabled = true;
+        // Вставляем спиннер в активную кнопку
+        btn.innerHTML = '<span class="spinner"></span>';
+    } else {
+        // Разблокируем обе
+        btn.disabled = false;
+        otherBtn.disabled = false;
+        // Возвращаем текст
+        btn.innerHTML = originalText;
+    }
+}
+
+/**
+ * Виброотклик
+ */
+function triggerHaptic() {
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // Короткий импульс 50мс
     }
 }

@@ -267,12 +267,16 @@ h1,
 
 /* Состояние загрузки для кнопок */
 .btn:disabled {
-    opacity: 0.7;
+    background: #d1d1d1;
+    /* Спокойный серый цвет */
+    color: #9e9e9e;
+    /* Светло-серый текст */
     transform: scale(0.98);
     box-shadow: none;
-    /* Убираем объем, чтобы кнопка казалась "вжатой" */
+    /* Убираем объем */
     pointer-events: none;
-    filter: grayscale(0.3);
+    filter: none;
+    opacity: 1;
 }
 
 /* Анимация вращения спиннера */

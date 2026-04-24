@@ -411,7 +411,7 @@ h1,
     margin-bottom: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
     /* Добавляем анимацию появления */
-    animation: slideIn 0.3s ease-out;
+    animation: slideIn 0.8s ease-out;
 }
 
 /* Выносим описание анимации отдельно */
